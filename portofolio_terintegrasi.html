@@ -1,0 +1,204 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Portofolio</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; background-color: #f9f9f9; }
+    .header { font-size: 24px; font-weight: bold; margin-bottom: 16px; }
+    .portfolio-summary { background-color: #e6f0fa; padding: 16px; border-radius: 8px; margin-bottom: 8px; }
+    .portfolio-summary h2 { margin: 0; font-size: 28px; }
+    .portfolio-summary .yield { color: green; margin-top: 4px; }
+    .action-buttons { display: flex; justify-content: space-between; margin: 12px 0 20px; }
+    .action-buttons .btn { flex: 1; margin: 0 4px; padding: 12px; font-size: 14px; background-color: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; }
+    .action-buttons .btn:hover { background-color: #0056b3; }
+    .info-link { color: #007bff; text-decoration: none; margin-bottom: 16px; display: inline-block; }
+    .card { background-color: white; padding: 16px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .card .left { display: flex; align-items: center; }
+    .icon { width: 32px; height: 32px; background-color: #a00; color: white; font-weight: bold; border-radius: 4px; display: flex; align-items: center; justify-content: center; margin-right: 10px; }
+    .right { text-align: right; }
+    .label { font-size: 12px; color: #555; }
+    .value { font-size: 14px; font-weight: bold; }
+    .green { color: green; }
+    .modal { display: none; position: fixed; z-index: 99; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
+    .modal-content { background-color: #fff; margin: 10% auto; padding: 20px; border-radius: 10px; width: 90%; max-width: 400px; }
+    .modal h3 { margin-top: 0; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-weight: bold; margin-bottom: 4px; }
+    .form-group input { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; }
+    .modal-footer { text-align: right; margin-top: 12px; }
+    .close { background-color: #aaa; color: white; border: none; border-radius: 6px; padding: 6px 12px; cursor: pointer; margin-right: 8px; }
+    .submit { background-color: #28a745; color: white; border: none; border-radius: 6px; padding: 8px 16px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<div class="header">Portofolio</div>
+
+<div class="portfolio-summary">
+  <div>Total Nilai Portofolio</div>
+  <h2 id="totalBalance">Rp10000000</h2>
+  <div class="yield" id="totalYield">Total Keuntungan Rp0</div>
+
+  <div class="action-buttons">
+    <button class="btn" onclick="openModal('depositModal')">Deposit</button>
+    <button class="btn" onclick="alert('Fitur penarikan berhasil (simulasi)')">Penarikan</button>
+    <button class="btn" onclick="alert('Fitur transfer berhasil (simulasi)')">Kirim</button>
+  </div>
+</div>
+
+<a href="#" class="info-link">Pilih jenis investasi</a>
+
+<div class="card" onclick="openModal('modalDeposito')">
+  <div class="left">
+    <div class="icon">D</div>
+    <div>
+      <div>Deposito</div>
+      <div class="label">1 Pendanaan</div>
+    </div>
+  </div>
+  <div class="right">
+    <div class="label">Nilai Portofolio</div>
+    <div class="value" id="depositoBalance">Rp0</div>
+    <div class="label">Potensi Imbal Hasil</div>
+    <div class="value green" id="depositoYield">Rp0</div>
+  </div>
+</div>
+
+<div id="modalDeposito" class="modal">
+  <div class="modal-content">
+    <h3>Formulir Deposito</h3>
+    <div class="form-group">
+      <label>Jumlah Deposit</label>
+      <input type="number" id="depositAmount" placeholder="Masukkan jumlah (Rp)" />
+    </div>
+    <div class="form-group">
+      <label>Durasi (detik)</label>
+      <input type="number" id="lockDuration" placeholder="Durasi penguncian (dalam detik)" />
+    </div>
+    <div class="modal-footer">
+      <button class="close" onclick="closeModal('modalDeposito')">Batal</button>
+      <button class="submit" onclick="startDeposito()">Mulai</button>
+    </div>
+  </div>
+</div>
+
+<div id="depositModal" class="modal">
+  <div class="modal-content">
+    <h3>Formulir Deposit</h3>
+    <div class="form-group">
+      <label>Jumlah Deposit</label>
+      <input type="number" placeholder="Masukkan jumlah (Rp)" />
+    </div>
+    <div class="form-group">
+      <label>Metode Pembayaran</label>
+      <input type="text" placeholder="Contoh: Bank Transfer" />
+    </div>
+    <div class="modal-footer">
+      <button class="close" onclick="closeModal('depositModal')">Batal</button>
+      <button class="submit" onclick="alert('Deposit berhasil (simulasi)')">Kirim</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let totalBalance = 10000000;
+  let depositoBalance = 0;
+  let depositoYield = 0;
+  let totalKeuntungan = 0;
+  let intervalId;
+
+  function updateDisplay() {
+    document.getElementById('totalBalance').innerText = formatRupiah(totalBalance);
+    document.getElementById('depositoBalance').innerText = formatRupiah(depositoBalance);
+    document.getElementById('depositoYield').innerText = formatRupiah(depositoYield, true);
+    document.getElementById('totalYield').innerText = `Total Keuntungan ${formatRupiah(totalKeuntungan, true)}`;
+  }
+
+  function formatRupiah(value, withDecimal = false) {
+    let number = withDecimal ? value.toFixed(2) : Math.floor(value).toString();
+    let parts = number.split('.');
+    let rupiah = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    return 'Rp' + rupiah + (parts[1] ? ',' + parts[1] : '');
+  }
+
+  function openModal(id) {
+    document.getElementById(id).style.display = 'block';
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
+  }
+
+  window.onclick = function(event) {
+    const modals = ['modalDeposito', 'depositModal'];
+    modals.forEach(id => {
+      const modal = document.getElementById(id);
+      if (event.target === modal) {
+        modal.style.display = "none";
+      }
+    });
+  }
+
+  function kirimKeSheet(jumlah, durasi, hasil) {
+    const url = 'https://script.google.com/macros/s/AKfycbyXKDMb0SqRP7uR8PJK5GAlQ5wBn5WzWt--TewA29MMvpJFllOlnasAsv6EjZOYZMc/exec'; // Ganti dengan URL Web App kamu
+    const data = { jumlah: jumlah, durasi: durasi, hasil: hasil };
+    fetch(url, {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => res.text())
+    .then(text => console.log('Berhasil kirim ke sheet:', text))
+    .catch(err => console.error('Gagal kirim:', err));
+  }
+
+  function startDeposito() {
+    const amount = parseFloat(document.getElementById('depositAmount').value);
+    const duration = parseInt(document.getElementById('lockDuration').value);
+
+    if (isNaN(amount) || isNaN(duration) || amount <= 0 || duration <= 0) {
+      alert("Masukkan jumlah dan durasi yang valid.");
+      return;
+    }
+
+    if (totalBalance < amount) {
+      alert("Saldo tidak mencukupi.");
+      return;
+    }
+
+    totalBalance -= amount;
+    depositoBalance = amount;
+    depositoYield = 0;
+    let elapsed = 0;
+
+    const roiPerSecond = (amount * 0.03) / 86400;
+
+    if (intervalId) clearInterval(intervalId);
+
+    intervalId = setInterval(() => {
+      if (elapsed >= duration) {
+        clearInterval(intervalId);
+        totalBalance += depositoBalance + depositoYield;
+        totalKeuntungan += depositoYield;
+        kirimKeSheet(amount, duration, depositoYield);
+        depositoBalance = 0;
+        depositoYield = 0;
+        updateDisplay();
+      } else {
+        depositoYield += roiPerSecond;
+        elapsed++;
+        updateDisplay();
+      }
+    }, 1000);
+
+    closeModal('modalDeposito');
+    updateDisplay();
+  }
+
+  updateDisplay();
+</script>
+</body>
+</html>
